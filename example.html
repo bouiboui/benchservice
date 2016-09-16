@@ -6,43 +6,108 @@
 </head>
 <body>
 
-<pre>Open your console to see the results</pre>
+<pre>
+    <span id="results">Loading...
+    </span>
+    Open your console to see the details
+</pre>
 
 <div id="scripts">
     <script src="dist/benchservice.js"></script>
     <script type="text/javascript">
 
-        var data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        // Holds the functions you want to compare
+        var competitors = {
+
+            // Some dumb test data you should ignore
+            data: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+
+            // Version with a `for` loop
+            forVersion: function () {
+                var sum = 0;
+                for (var i = 0; i < competitors.data.length; i++) {
+                    sum += competitors.data[i];
+                }
+                return sum;
+            },
+
+            // Version with a `for..in` loop
+            forInVersion: function () {
+                var sum = 0;
+                for (var i in competitors.data) {
+                    sum += competitors.data[i];
+                }
+                return sum;
+            },
+
+            // Version with a `while--` loop
+            whileVersion: function () {
+                var sum = 0;
+                var i = competitors.data.length;
+                while (i--) {
+                    sum += competitors.data[i];
+                }
+                return sum;
+            },
+
+            // Version with `.map`
+            mapVersion: function () {
+                var sum = 0;
+                competitors.data.map(function (val) {
+                    sum += val;
+                });
+                return sum;
+            }
+        };
+
+        // Let's create an instance
         var b = new BenchService();
 
-        var times = 500000;
+        // Number of times we want our benchmarks to be performed
+        var timesArray = [1000, 5000, 10000, 50000];
+        var times;
+        for (var i in timesArray) {
+            times = timesArray[i];
 
-        b.bench("for", function () {
-            var sum = 0;
-            for (var i = 0; i < data.length; i++) {
-                sum += data[i];
-            }
-            return sum;
-        }, times);
+            //     (label, function to test, number of times to execute)
+            b.bench("for    ", competitors.forVersion, times);
+            b.bench("for..in", competitors.forInVersion, times);
+            b.bench("while--", competitors.whileVersion, times);
+            b.bench("map    ", competitors.mapVersion, times);
 
-        b.bench("for..in", function () {
-            var sum = 0;
-            for (var i in data) {
-                sum += data[i];
-            }
-            return sum;
-        }, times);
+        }
 
-        b.bench("while", function () {
-            var sum = 0;
-            var i = data.length;
-            while (i--) {
-                sum += data[i];
-            }
-            return data;
-        }, times);
-
+        // This will output an object with all the details and a "fastest" property for each run
         console.log(b.getResults());
+
+
+        // "Table" rendering
+        var ranking = b.getRanking();
+        var ranks = ["Fastest", "Fast   ", "Slower ", "Slowest"];
+
+        var html = "Iterations";
+
+        // Headers
+        for (var hcol = 0; hcol < ranking[times].length; hcol++) {
+            html += "\t\t" + (hcol + 1) + ". " + ranks[hcol];
+        }
+        html += "\n    ";
+
+        // Values
+        var iterations, cols, col;
+        for (var row = 0; row < timesArray.length; row++) {
+            iterations = timesArray[row];
+            cols = ranking[iterations];
+            // Each line starts with the number of iterations
+            html += iterations + "\t";
+            for (col = 0; col < cols.length; col++) {
+                html += (col > 0 ? "\t\t" : "\t") + cols[col][0] + " (" + (cols[col][1] + "").substr(0, 5) + ")";
+            }
+            html += "\n    "
+        }
+
+        // Display!
+        document.getElementById("results").innerHTML = html;
 
     </script>
 </div>
