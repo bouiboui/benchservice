@@ -37,7 +37,7 @@ var add3 = function() { ... }
 
 // Add your benchmarks
 
-// bench ( name to display, callable, number of times to execute)
+// bench(name to display, callable, number of times to execute)
 b.bench("Add Function 1", add1, 10000);
 b.bench("Add Function 2", add2, 10000);
 b.bench("Add Function 3", add3, 10000);
